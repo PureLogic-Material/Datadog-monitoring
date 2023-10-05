@@ -17,7 +17,6 @@ metadata:
   name: datadog-cluster-agent
   namespace: default
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: datadog-cluster-agent
@@ -31,7 +30,7 @@ spec:
         ad.datadoghq.com/datadog-cluster-agent.init_configs: '[{}]'
         ad.datadoghq.com/datadog-cluster-agent.instances: '[{"prometheus_url": "http://%%host%%:5000/metrics","namespace": "datadog.cluster_agent","metrics": ["go_goroutines","go_memstats_*","process_*","api_requests","datadog_requests","external_metrics", "cluster_checks_*"]}]'
     spec:
-      serviceAccountName: datadog-cluster-agent #dca
+      serviceAccountName: dca
       containers:
       - image: datadog/cluster-agent:latest
         imagePullPolicy: Always
