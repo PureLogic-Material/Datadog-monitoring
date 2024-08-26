@@ -1,0 +1,64 @@
+datadog:
+  apiKeyExistingSecret: datadog-secret
+  appKeyExistingSecret: null
+  site: us3.datadoghq.com
+  kubelet:
+    tlsVerify: false
+    host:
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    hostCAPath: /etc/kubernetes/certs/kubeletserver.crt
+  tags:
+    - env:production
+  apm:
+    instrumentation:
+      enabledNamespaces:
+        - qtrac
+      libVersions:
+        js: v5.5.0
+  logs:
+    enabled: true
+    containerCollectAll: true
+  securityAgent:
+    runtime:
+      enabled: false
+    compliance:
+      enabled: false
+  sbom:
+    containerImage:
+      enabled: true
+    host:
+      enabled: true
+  serviceMonitoring:
+    enabled: true
+  networkMonitoring:
+    enabled: true
+providers:
+  aks:
+    enabled: true
+targetSystem: linux
+clusterAgent:
+  confd:
+    kubernetes_apiserver.yaml : |
+      init_config:
+      instances:
+        - use_component_status: false
+  additionalLabels: {}
+  admissionController:
+    configMode: service
+    enabled: true
+    failurePolicy: Ignore
+    port: 8000
+    webhookName: datadog-webhook
+    labelSelectors:
+      - key: control-plane
+        operator: DoesNotExist
+      - key: control-plane
+        operator: NotIn
+        values:
+          - "true"
+      - key: kubernetes.azure.com/managedby
+        operator: NotIn
+        values:
+          - aks

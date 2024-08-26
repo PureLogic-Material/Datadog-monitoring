@@ -1,0 +1,59 @@
+datadog:
+  apiKeyExistingSecret: datadog-secret-staging
+  appKeyExistingSecret: null
+  site: us3.datadoghq.com
+  clusterChecks:
+    enabled: true
+  kubelet:
+    tlsVerify: false
+    host:
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    hostCAPath: /etc/kubernetes/certs/kubeletserver.crt
+  tags:
+    - env:staging
+  apm:
+    instrumentation:
+      enabledNamespaces:
+        - qtrac
+      libVersions:
+        js: v5.5.0
+  logs:
+    enabled: true
+    containerCollectAll: true
+  containerExcludeLogs: kube_namespace:.*
+  containerIncludeLogs: kube_namespace:qtrac.*
+  serviceMonitoring:
+    enabled: true
+  networkMonitoring:
+    enabled: true
+  # DD_CONTAINER_INCLUDE_LOGS: "name:^dd-agent$"
+providers:
+  aks:
+    enabled: true
+targetSystem: linux
+clusterAgent:
+  confd:
+    kubernetes_apiserver.yaml : |
+      init_config:
+      instances:
+        - use_component_status: false
+  additionalLabels: {}
+  admissionController:
+    configMode: service
+    enabled: true
+    failurePolicy: Ignore
+    port: 8000
+    webhookName: datadog-webhook
+    labelSelectors:
+      - key: control-plane
+        operator: DoesNotExist
+      - key: control-plane
+        operator: NotIn
+        values:
+          - "true"
+      - key: kubernetes.azure.com/managedby
+        operator: NotIn
+        values:
+          - aks
